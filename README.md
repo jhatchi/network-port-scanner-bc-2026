@@ -1,351 +1,176 @@
 # Network Port Scanner
 
-A Python tool for analyzing open ports on a machine or local network.
-Developed as part of a networking learning project.
+A Python TCP port scanner with interactive CLI, SYN stealth mode, host discovery, automated CVE lookup, OS and version detection, firewall fingerprinting, and Nmap-compatible reports. Built as a 4-day team project during the BeCode Brussels Blue & Red Team bootcamp.
 
----
+[![tests](https://github.com/Jhatchi/network-port-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/Jhatchi/network-port-scanner/actions/workflows/tests.yml)
+[![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen.svg)](docs/testing.md)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](requirements.txt)
+[![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](docs/architecture.md)
+[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Johan--Emmanuel%20Hatchi-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/johan-emmanuel-hatchi/)
 
-## What is a port scanner?
+## Screenshot
 
-Every machine connected to a network communicates through **ports**. A port is like a numbered door (from 1 to 65535) through which a service can receive connections.
+![Scan report HTML output](docs/screenshots/scan-report.png)
 
-Examples of well-known ports:
-| Port | Service |
-|------|---------|
-| 22 | SSH (secure remote access) |
-| 80 | HTTP (websites) |
-| 443 | HTTPS (secure websites) |
-| 3389 | Windows Remote Desktop |
+HTML report from a real scan against Metasploitable 2 (192.168.56.2). Shows 23 open ports, banner/version detection, and 17 CVEs auto-discovered via the NVD API. Hover any CVE badge in the actual report for severity and description.
 
-A port scanner **attempts to connect** to each port on a machine and observes the response:
-- **open** — the port responds, a service is running behind it
-- **closed** — the port responds but refuses the connection (nothing is running)
-- **filtered** — no response (firewall or machine is down)
+## ⚠ Legal disclaimer
 
-This tool is used to map active services on a network — useful for system administration, security auditing, or simply understanding what is running on your network.
+**For educational and lab use only, on systems you own or have explicit written authorization to test.**
 
----
+Scanning a network or machine without authorization is **illegal** in Belgium (law of 28 November 2000 on computer crime, articles 550bis and 550ter), in France (Penal Code articles 323-1 to 323-7), and across the EU under the NIS2 directive (2022/2555). The same restrictions apply in most jurisdictions.
 
-## How does it work?
+**Authorized contexts:**
 
-### TCP connect scan (default mode)
+- Your own infrastructure (personal machine, personal server, home lab)
+- An isolated lab network (VM, containerized lab, Metasploitable, HackTheBox VPN)
+- A pentest engagement with a signed contract defining scope
+- A bug bounty program with a published scope
 
-This is the simplest method. For each port, the scanner performs a **full TCP handshake** (the basic internet protocol):
+**Prohibited:**
 
-```
-Scanner  ->  SYN        ->  Target machine
-Scanner  <-  SYN-ACK    <-  Target machine  (port open)
-Scanner  ->  ACK        ->  Target machine
-Scanner  ->  FIN        ->  Target machine  (clean close)
-```
+- Scanning public servers without permission
+- Scanning a company's, school's, or ISP's network without written authorization
+- Using scan results to exploit vulnerabilities on third-party systems
 
-If the machine responds with `RST` (reset) instead of `SYN-ACK`, the port is closed.
-If nothing responds after the configured timeout, the port is filtered.
+The authors disclaim all responsibility in case of misuse. Use the included `--randomize`, `--max-rate`, `--jitter` and `--delay` flags responsibly: they exist to reduce load and avoid harming the target, not to evade detection by systems you have no right to scan.
 
-### SYN scan (stealth mode, requires sudo)
+## What it does
 
-More discreet. The scanner only sends the first `SYN` packet without ever completing the connection. The connection is never fully established, so it does not appear in application logs.
+- **Scans TCP ports** in two modes: standard `connect` (no privileges) or stealth `SYN` (raw packets via scapy, requires sudo). Hundreds of ports in parallel via `ThreadPoolExecutor`.
+- **Enriches each open port** with service name, banner, software version (HTTP, SSH, MySQL, DNS, VNC, Redis, IRC, PostgreSQL and more), OS fingerprint (TTL-based), and firewall type (silent DROP vs active REJECT).
+- **Looks up CVEs automatically** against the NIST NVD API for detected versions, then exports everything to Nmap-compatible XML, HTML (with CVE tooltips), JSON, CSV or TXT.
 
-```
-Scanner  ->  SYN        ->  Target machine
-Scanner  <-  SYN-ACK    <-  Target machine  (port open, but we don't send the ACK)
-```
+## Tech stack
 
-This mode requires administrator privileges (`sudo`) because it sends **raw packets** directly at the network level, bypassing the operating system's TCP stack.
+**Core (Python standard library):** `socket`, `concurrent.futures.ThreadPoolExecutor`, `ipaddress`, `subprocess`, `threading`, `argparse`, `json`, `csv`, `html`, `xml.etree.ElementTree`
+**Optional:** `scapy` (raw packets for SYN scan, ARP discovery, OS and firewall detection), `tqdm` (progress bar), `requests` (NVD API for CVE lookup)
+**Dev:** `pytest`
+**Platforms:** Linux, macOS, Windows (Windows needs Npcap for scapy)
 
-### Parallelism (why it's fast)
-
-Scanning 1024 ports one by one at 1 second timeout = **17 minutes**.
-With 100 parallel threads = **a few seconds**.
-
-The project uses `ThreadPoolExecutor`: a pool of execution threads that work simultaneously, each scanning a different port.
-
----
-
-## Project structure
-
-```
-Port_scanner_Reseau/
-├── cli.py              -> Step-by-step interactive interface (beginner-friendly)
-├── main.py             -> Full command-line interface
-├── scanner.py          -> Scan engine (core logic)
-├── output.py           -> Results export (txt, json, csv, html, xml)
-├── discovery.py        -> Active host discovery on a network
-├── vuln_analyzer.py    -> Vulnerability analysis (CVE lookup via NVD API)
-├── tests/              -> Automated tests (76 tests)
-└── documentation/      -> Design reports, tests, ethics
-```
-
----
-
-## Libraries used
-
-### Python standard library (no installation needed)
-
-**`socket`**
-Python's core networking library. It is what actually performs TCP connections. It allows opening a socket (connection endpoint), connecting it to an IP address + port, and reading/writing data.
-```python
-sock.connect_ex(("192.168.1.1", 80))  # returns 0 if open
-```
-
-**`concurrent.futures` (ThreadPoolExecutor)**
-Manages the parallel thread pool. Instead of launching and managing each thread manually, `ThreadPoolExecutor` automatically distributes work among N threads and collects results.
-```python
-with ThreadPoolExecutor(max_workers=100) as executor:
-    futures = {executor.submit(scanner, port): port for port in ports}
-```
-
-**`subprocess`**
-Allows executing system commands from Python — used to run pings (`ping -c 1 192.168.1.1`) during ICMP host discovery.
-
-**`ipaddress`**
-Parses and manipulates IP addresses and CIDR networks (`192.168.1.0/24`). Computes the list of all addresses in a subnet without manual binary calculations.
-
-**`argparse`**
-Handles command-line arguments (`--target`, `--ports`, etc.). Automatically generates the `--help` message.
-
-**`json` / `csv`**
-Exports results in these standard formats.
-
-**`threading`**
-Used for global rate limiting: a shared `Lock` between all threads ensures only one packet is sent at a time when `--max-rate` is enabled.
-
-**`html`**
-Escapes special characters (`<`, `>`, `&`) in the HTML report to prevent code injection.
-
----
-
-### Optional libraries (installed separately)
-
-**`scapy`**
-The Python library for network packet manipulation. It allows forging raw TCP/IP packets "by hand" — this is what makes the SYN scan possible. Without scapy, the scanner automatically falls back to TCP connect.
-```python
-pkt = IP(dst="192.168.1.1") / TCP(dport=80, flags="S")  # forged SYN packet
-resp = sr1(pkt, timeout=1)  # send and wait for response
-```
-Scapy is also used for ARP sweeping during host discovery on a local network.
-
-**`tqdm`**
-Displays a progress bar in the terminal during the scan. Purely cosmetic — if absent, the scanner works normally without a progress bar.
-
-**`pytest`**
-Automated testing framework. Used to verify that each function in the project behaves correctly with 76 unit tests.
-
-**`requests`**
-HTTP library used by `vuln_analyzer.py` for querying the NVD (National Vulnerability Database) API to look up known CVEs associated with detected service versions.
-
----
-
-## Advanced options
-
-### Host discovery — `--discover`
-
-Before scanning ports, detects which machines are active on the network.
+## Quick start
 
 ```bash
-python main.py --target 192.168.1.0/24 --discover --ports 22,80
+git clone https://github.com/Jhatchi/network-port-scanner.git && cd network-port-scanner
+python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+python cli.py    # interactive wizard, OR: python main.py --target 192.168.1.1 --ports 22,80,443 --output scan.html
 ```
 
-Without `--discover`, the scanner directly attempts to connect to the target's ports. With `--discover`, it first sends ARP requests (or ICMP pings) to list responding machines, then scans only those. Useful on a `/24` subnet to avoid wasting time on inactive IPs.
-
----
-
-### Service banners — `--banner`
-
-Reads the first response sent by each open service.
+**SYN stealth scan** (requires sudo on Linux/macOS, admin + Npcap on Windows):
 
 ```bash
-python main.py --target 192.168.1.1 --ports 22,80,443 --banner
+sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 --ports 1-1024 --scan-type syn --output scan.html
 ```
 
-When a port is open, the service behind it often displays an identification line upon connection — this is the **banner**. It may contain the software name and version (`SSH-2.0-OpenSSH_8.9`, `Apache/2.4.54`). This information helps identify installed software and detect outdated versions.
+Full per-OS instructions in [USAGE_GUIDE.md](USAGE_GUIDE.md).
 
----
+## Team and contributions
 
-### Version detection — `--version-detect`
+Four-day BeCode bootcamp team project. Three contributors, distinct responsibilities:
 
-Identifies the exact software version running behind each open port.
+| Contributor | Scope | Where to look |
+|---|---|---|
+| **[Johan-Emmanuel Hatchi](https://github.com/Jhatchi)** | Architecture, scan engine (`scanner.py`), reporting layer (`output.py`), interactive CLI (`cli.py`), test suite (76 tests), cross-platform compatibility, integration | Main branch, full commit history |
+| **Mike** ([Mike00001](https://github.com/Mike00001)) | CVE reporting integration: changes to `cli.py`, `main.py`, `output.py` to surface vulnerabilities in the HTML/JSON/CSV outputs | Branch [`Mike_dev`](https://github.com/Jhatchi/network-port-scanner/tree/Mike_dev) (kept unmerged to preserve original commit authorship) |
+| **Gaëtan** ([Gaetan5555](https://github.com/Gaetan5555)) | Service detection (protocol-specific version probes design) | Code shared via messages due to a Git branching setup issue, integrated into the main branch under Johan's commits |
 
-```bash
-python main.py --target 192.168.1.1 --ports 22,80,443 --version-detect
-```
+### Why the single-author git history on `main`
 
-For each open port, the scanner sends a protocol-appropriate request and extracts the version from the response. Supported protocols include HTTP (HEAD), SMTP (EHLO), FTP, SSH, MySQL (greeting packet), PostgreSQL, DNS (version.bind), VNC (RFB), Redis (INFO), IRC, and more. Example: an open port 80 may reveal `Apache/2.4.54` or `nginx/1.18.0`. Works without sudo.
+A look at `git log main` shows commits by a single author. This is a deliberate consequence of the collaboration model, not a misattribution:
 
----
+- Mike worked on his own branch (`Mike_dev`), which was not merged into `main` because his work was experimental and superseded by later iterations. **His branch is preserved on this repo so his commits remain visible under his own GitHub identity.**
+- Gaëtan could not push to his own branch due to a local Git configuration issue. He shared his contributions via direct messages, which were then integrated by Johan into the main branch.
 
-### Vulnerability scan — `--vuln-scan`
+This is acknowledged openly here because honest attribution matters more than appearing to have managed the branching perfectly.
 
-Searches for known CVEs on detected service versions (requires Internet).
+## Architecture
 
-```bash
-python main.py --target 192.168.1.1 --ports 22,80,443 --version-detect --vuln-scan
-```
+Six Python modules with single responsibilities:
 
-When combined with `--version-detect`, the scanner queries the NVD (National Vulnerability Database) API for known vulnerabilities (CVEs) matching the detected software versions. Results include CVE identifiers, severity scores, and descriptions. Requires the `requests` library and an active Internet connection.
+| Module | Role |
+|---|---|
+| [`scanner.py`](scanner.py) | Scan engine: TCP connect + SYN, banner grab, version probes, OS / firewall detection, threaded execution |
+| [`discovery.py`](discovery.py) | Host discovery via ARP sweep (scapy) or ICMP ping fallback |
+| [`output.py`](output.py) | Report writers: TXT, JSON, CSV, HTML (with CVE tooltips), Nmap-compatible XML |
+| [`vuln_analyzer.py`](vuln_analyzer.py) | NVD API client, CVE lookup with in-memory cache, CVSS >= 7.0 filter |
+| [`main.py`](main.py) | CLI entry point: input validation, pipeline orchestration, multi-host fan-out |
+| [`cli.py`](cli.py) | Interactive wizard layered on top of `main.py`, profiles and speed presets |
 
----
+Full module reference, interaction diagram, dependency table and CLI options in [`docs/architecture.md`](docs/architecture.md).
 
-### OS detection — `--os-detect`
+## Features
 
-Attempts to guess the target machine's operating system.
+<details>
+<summary><strong>Detection</strong> (5 flags)</summary>
 
-```bash
-sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 --ports 22,80 --os-detect
-```
+| Flag | Effect |
+|---|---|
+| `--banner` | Passive banner grab on open ports (SSH, FTP, SMTP, ...) |
+| `--version-detect` | Protocol-specific probes (HTTP HEAD, SMTP EHLO, MySQL greeting, DNS version.bind, VNC RFB, Redis INFO, IRC, PostgreSQL, ...) |
+| `--os-detect` | TTL fingerprinting via raw packets. Requires scapy + sudo |
+| `--firewall-detect` | Distinguishes `filtered-silent` (DROP) from `filtered-active` (ICMP REJECT). Requires scapy + sudo |
+| `--vuln-scan` | Looks up CVEs via NIST NVD API, CVSS >= 7.0, in-memory cache to avoid duplicate calls |
 
-The technique used is **TTL fingerprinting**: each OS responds with a different TTL value in network packets (Linux/Unix <= 64, Windows <= 128, network devices > 128). Requires `scapy` and `sudo` as it sends raw packets.
+</details>
 
----
+<details>
+<summary><strong>Performance and stealth</strong> (6 flags)</summary>
 
-### Firewall detection — `--firewall-detect`
+| Flag | Effect |
+|---|---|
+| `--threads N` | Parallel connections (default 100). 400 on LAN, 50 over the internet |
+| `--timeout S` | Per-port timeout in seconds (default 1.0). 0.3 on LAN, 1-2 over the internet |
+| `--randomize` | Shuffle port order. Defeats sequential-scan IDS signatures |
+| `--max-rate N` | Global ceiling in packets per second, via shared lock across threads. More precise than `--delay` |
+| `--jitter S` | Random delay 0-S seconds between probes. Avoids regular timing patterns |
+| `--delay S` | Fixed pause between probes in each thread (simpler than `--max-rate`) |
 
-Distinguishes silently blocked ports (DROP) from actively rejected ports (REJECT).
+</details>
 
-```bash
-sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 --ports 1-1024 --firewall-detect
-```
+<details>
+<summary><strong>Workflow</strong></summary>
 
-A standard `filtered` port can mean two very different things: either the firewall silently ignores the packet (`filtered-silent` — DROP rule), or it responds with an ICMP "destination unreachable" message (`filtered-active` — REJECT rule). This distinction helps understand the firewall configuration. Requires `scapy` and `sudo`.
+| Flag | Effect |
+|---|---|
+| `--target` | IP, IPv6, hostname or CIDR (`192.168.1.0/24`) |
+| `--ports` | `22,80,443` or `1-1024` or any combination |
+| `--scan-type` | `connect` (default) or `syn` |
+| `--discover` | ARP sweep (scapy) or ICMP ping before scanning, to avoid wasting time on dead IPs |
+| `--output` | `.txt`, `.json`, `.csv`, `.html`, `.xml` (Nmap-compatible) |
 
----
+</details>
 
-### Threads — `--threads`
+Full per-flag walkthrough with examples in [USAGE_GUIDE.md](USAGE_GUIDE.md).
 
-Controls the number of connections launched in parallel.
+## Documentation
 
-```bash
-python main.py --target 192.168.1.1 --ports 1-1024 --threads 200
-```
+| Doc | What it covers |
+|---|---|
+| [USAGE_GUIDE.md](USAGE_GUIDE.md) | Per-OS install, interactive vs CLI flow, SYN scan setup on Linux/macOS/Windows |
+| [docs/architecture.md](docs/architecture.md) | Full module reference, interaction diagram, dependency table, CLI options |
+| [docs/walkthrough-statistics-summary.md](docs/walkthrough-statistics-summary.md) | Line-by-line walkthrough of the `print_summary()` function |
+| [docs/testing.md](docs/testing.md) | Test coverage breakdown across the 76 tests in 5 files |
+| [docs/cli-demo.md](docs/cli-demo.md) | Text capture of the interactive CLI flow (questions and answers) |
+| [docs/ethics.md](docs/ethics.md) | Detailed legal framework, authorized uses, detection patterns |
+| [docs/technical-report.md](docs/technical-report.md) | Full project technical report (protocols, scan modes, packet analysis) |
+| [docs/design-history/](docs/design-history/) | Original design and implementation plan, kept as-built archive |
 
-Default: 100 threads. Increasing speeds up the scan but generates more simultaneous traffic (more detectable, more load on the target). Decreasing slows it down but is more discreet. On a fast local network, 400 threads is reasonable. Over the internet, 50 is wiser.
+## Known limits
 
----
+- **No TLS / HTTPS probe.** `--version-detect` on port 443 falls back to a generic `\r\n` probe because the underlying library does not do a TLS handshake. Adding `ssl.wrap_socket` is the obvious next step.
+- **Scapy required for advanced features.** SYN scan, OS detection, firewall fingerprinting and ARP discovery all need `scapy` + sudo. On Windows, this also means installing Npcap. Standard TCP connect scan needs none of this.
+- **NVD cache is in-memory only.** CVE lookups are cached within a single scan run, but not persisted between runs. Repeated scans of the same target hit the NVD API again. Persistent cache (SQLite or JSON) is a one-evening addition.
+- **ARP discovery is single-segment.** ARP cannot cross routers, so `--discover` on a `/16` falls back to ICMP ping for hosts outside the local Ethernet segment.
+- **No coverage measurement.** 76 tests pass, but `pytest-cov` is not configured. Coverage % is unmeasured (and almost certainly lower than it looks because of the heavy use of mocks).
+- **No retry / backoff on transient errors.** A port that briefly drops a SYN-ACK due to a transient packet loss is classified `filtered`. A real penetration testing tool would retry with a different jitter. We did not.
 
-### Timeout — `--timeout`
+## License
 
-Maximum wait time per port, in seconds.
+[MIT](LICENSE), 2026 Johan-Emmanuel Hatchi and contributors.
 
-```bash
-python main.py --target 192.168.1.1 --ports 1-1024 --timeout 0.5
-```
+## About
 
-Default: 1 second. If the target does not respond within this delay, the port is marked `filtered`. Reducing the timeout speeds up the scan but risks classifying `open` or `closed` ports as `filtered` if the connection is slow. On a local network, 0.3 s is enough. Over the internet, keep 1 to 2 s.
+Four-day team project built during the [BeCode Brussels](https://becode.org) Blue & Red Team bootcamp (November 2025 to September 2026). Lead and integration: **[Johan-Emmanuel Hatchi](https://github.com/Jhatchi)** ([LinkedIn](https://www.linkedin.com/in/johan-emmanuel-hatchi/)). Contributors: [Mike](https://github.com/Mike00001), [Gaëtan](https://github.com/Gaetan5555).
 
----
-
-## Stealth features
-
-To reduce detection by network monitoring systems (IDS):
-
-**`--randomize`** — shuffles the port order before scanning. A sequential scan (1, 2, 3, 4...) is an immediately recognizable signature for an IDS. With `--randomize`, the order is unpredictable.
-
-**`--delay 0.1`** — adds a fixed pause between each scanned port. Simple and predictable, but reduces load. Use when you just want to slow down without complexity. Example: `--delay 0.1` = 100 ms between each port.
-
-**`--max-rate 2`** — limits the global throughput to N packets per second via a shared lock between all threads. More precise than `--delay` because it controls the actual send rate independently of the thread count. `--max-rate 2` = maximum 2 packets per second, regardless of how many threads are running.
-
-> **Difference between `--delay` and `--max-rate`:** `--delay` adds a pause in each thread individually — with 100 threads and `--delay 0.1`, you still send 100 packets every 0.1 s. `--max-rate` serializes all sends globally — with `--max-rate 2`, exactly 2 packets per second are sent in total.
-
-**`--jitter 0.3`** — adds a random delay between 0 and 0.3 seconds. A fixed delay produces a regular rhythm that is detectable; a variable delay looks more like human traffic.
-
-**Single DNS resolution** — if you scan `myserver.local`, the hostname is resolved to an IP once at the start, not on every connection. This avoids N visible DNS queries on the network.
-
----
-
-## Installation and usage
-
-### Prerequisites
-
-- Python 3.10 or newer
-- A terminal (cmd / PowerShell on Windows, Terminal on macOS/Linux)
-
-### Installation (one-time setup)
-
-```bash
-# macOS / Linux
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Windows (PowerShell or cmd)
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### Running the scanner
-
-```bash
-# Interactive mode (recommended — asks questions one by one, displays statistics summary)
-python cli.py
-
-# Direct command line
-python main.py --target 192.168.1.1 --ports 22,80,443 --output report.html
-
-# SYN stealth scan (requires sudo on macOS/Linux, admin on Windows)
-sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 --ports 1-1024 --scan-type syn
-
-# Full scan with vulnerability detection
-python main.py --target 192.168.1.1 --ports 1-1024 --version-detect --vuln-scan --output report.html
-```
-
-> The interactive CLI (`cli.py`) displays only a statistics summary at the end of the scan. Root users can choose between SYN and TCP connect scan modes.
-
-> For detailed per-system instructions (Linux / macOS / Windows) and SYN scan setup, see **[USAGE_GUIDE.md](USAGE_GUIDE.md)**.
-
-### Running the tests
-
-```bash
-python -m pytest tests/ -v
-# 76 tests, expected result: 76 passed
-```
-
----
-
-## Result format
-
-The scan returns a dictionary per port:
-
-```python
-{
-    port: {
-        "status": "open" | "closed" | "filtered",
-        "service": "http",
-        "banner": "Apache/2.4.54 ...",
-        "os": "Linux/Unix",
-        "version": "Apache/2.4.54",
-        "firewall": "open",
-        "vulns": [{"id": "CVE-2024-XXXX", "cvss": 9.8, "description": "..."}]
-    }
-}
-```
-
-### Example output
-
-```
-Scanning 192.168.1.1 — 26 ports (connect)
-
---- Scan Summary ---
-  Ports scanned   : 26
-  Ports open      : 2
-  Ports closed    : 1
-  Ports filtered  : 23
-  Open rate       : 7.69%
-  Execution time  : 1.23 seconds
-
-Results saved to scan_results.html
-```
-
-> Per-port details (status, service, banner, version, CVEs) are written to the report file only — not displayed in the terminal. All report formats (HTML, XML, JSON, CSV, TXT) include the detected OS in the header.
-
----
-
-## Legal disclaimer
-
-Scanning a network **without authorization** is illegal.
-
-In Belgium, the law of November 28, 2000 on computer crime punishes unauthorized access to a computer system. The European NIS2 directive strengthens these obligations for critical infrastructure.
-
-**Authorized uses:** your own network, a machine you administer, a test environment, a pentest with written agreement from the owner.
-
-**Prohibited uses:** scanning third-party machines or networks without permission.
+Open to cybersecurity internship opportunities starting September 2026 in Belgium.
