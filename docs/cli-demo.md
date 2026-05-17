@@ -2,7 +2,7 @@
 
 ---
 
-## Interactive mode — `python cli.py`
+## Interactive mode: `python cli.py`
 
 ### Standard user (no root)
 
@@ -22,10 +22,10 @@
   ── What do you want to scan? ─────────────────
 
   Choose a profile:
-    1. Quick scan    — common ports (web, SSH, remote desktop)  <- recommended
-    2. Standard scan — all reserved ports (1 to 1024)
-    3. Full scan     — all ports (1 to 65535, slow)
-    4. Custom        — I choose myself
+    1. Quick scan   : common ports (web, SSH, remote desktop)  <- recommended
+    2. Standard scan: all reserved ports (1 to 1024)
+    3. Full scan    : all ports (1 to 65535, slow)
+    4. Custom       : I choose myself
   Your choice [Enter = 1] : 1
 
   ── Scan speed? ───────────────────────────────
@@ -74,7 +74,7 @@
 
 Start the scan? [Y/n] :
 
-Scanning 192.168.1.1 — 26 ports (connect)
+Scanning 192.168.1.1: 26 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 26
@@ -87,12 +87,12 @@ Scanning 192.168.1.1 — 26 ports (connect)
 Results saved to scan_results.html
 ```
 
-### Root user (sudo) — scan mode choice
+### Root user (sudo): scan mode choice
 
 ```
 ╔══════════════════════════════════════════════╗
 ║           Network Port Scanner               ║
-║  Root detected — SYN and connect available   ║
+║  Root detected: SYN and connect available   ║
 ╚══════════════════════════════════════════════╝
 
   Answer the questions below.
@@ -105,17 +105,17 @@ Results saved to scan_results.html
   ── Scan mode ─────────────────────────────────
 
   Choose a scan mode:
-    1. SYN scan   — stealthy, half-open (no full TCP connection)  <- recommended
-    2. TCP connect — full connection, enables all options (banner, CVE...)
+    1. SYN scan  : stealthy, half-open (no full TCP connection)  <- recommended
+    2. TCP connect: full connection, enables all options (banner, CVE...)
   Your choice [Enter = 1] : 1
 
   ── What do you want to scan? ─────────────────
 
   Choose a profile:
-    1. Quick scan    — common ports (web, SSH, remote desktop)  <- recommended
-    2. Standard scan — all reserved ports (1 to 1024)
-    3. Full scan     — all ports (1 to 65535, slow)
-    4. Custom        — I choose myself
+    1. Quick scan   : common ports (web, SSH, remote desktop)  <- recommended
+    2. Standard scan: all reserved ports (1 to 1024)
+    3. Full scan    : all ports (1 to 65535, slow)
+    4. Custom       : I choose myself
   Your choice [Enter = 1] : 2
 
   ── Scan speed? ───────────────────────────────
@@ -128,14 +128,14 @@ Results saved to scan_results.html
   Your choice [Enter = 2] :
 
   ── Additional options ────────────────────────
-  SYN mode active — options incompatible with stealth disabled:
+  SYN mode active: options incompatible with stealth disabled:
 
-  [x] Network discovery  — ARP sweep / ICMP ping generate detectable noise
+  [x] Network discovery : ARP sweep / ICMP ping generate detectable noise
       before the port scan even begins.
-  [x] Banner grabbing    — opens a full TCP connection (SYN+ACK+ACK)
+  [x] Banner grabbing   : opens a full TCP connection (SYN+ACK+ACK)
       logged by the target's application layer.
-  [x] Version detection  — same reason as banner grabbing.
-  [x] Firewall detection — sends additional SYN probes on each filtered
+  [x] Version detection : same reason as banner grabbing.
+  [x] Firewall detection: sends additional SYN probes on each filtered
       port, multiplying detectable traffic.
 
   Attempt to detect the target OS? [y/N] : y
@@ -165,7 +165,7 @@ Start the scan? [Y/n] :
 
   OS detected: Linux/Unix
 
-Scanning 192.168.1.1 — 1024 ports (syn)
+Scanning 192.168.1.1: 1024 ports (syn)
 
 --- Scan Summary ---
   Ports scanned   : 1024
@@ -180,14 +180,14 @@ Results saved to scan_results.html
 
 ---
 
-## Command-line mode — `python main.py`
+## Command-line mode: `python main.py`
 
 ### Simple scan
 
 ```
 $ python main.py --target 192.168.1.1 --ports 22,80,443
 
-Scanning 192.168.1.1 — 3 ports (connect)
+Scanning 192.168.1.1: 3 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 3
@@ -205,7 +205,7 @@ Results saved to scan_results.txt
 ```
 $ python main.py --target 192.168.1.1 --ports 22,80,443 --banner --version-detect
 
-Scanning 192.168.1.1 — 3 ports (connect)
+Scanning 192.168.1.1: 3 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 3
@@ -223,7 +223,7 @@ Results saved to scan_results.txt
 ```
 $ python main.py --target 192.168.1.1 --ports 22,80 --version-detect --vuln-scan
 
-Scanning 192.168.1.1 — 2 ports (connect)
+Scanning 192.168.1.1: 2 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 2
@@ -244,7 +244,7 @@ $ sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 \
 
   OS detected: Linux/Unix
 
-Scanning 192.168.1.1 — 3 ports (connect)
+Scanning 192.168.1.1: 3 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 3
@@ -263,7 +263,7 @@ Results saved to scan.xml
 $ sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 \
     --ports 1-1024 --firewall-detect --output scan.html
 
-Scanning 192.168.1.1 — 1024 ports (connect)
+Scanning 192.168.1.1: 1024 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 1024
@@ -282,7 +282,7 @@ Results saved to scan.html
 $ sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 \
     --ports 1-1024 --scan-type syn --max-rate 2 --randomize
 
-Scanning 192.168.1.1 — 1024 ports (syn)
+Scanning 192.168.1.1: 1024 ports (syn)
 
 --- Scan Summary ---
   Ports scanned   : 1024
@@ -302,9 +302,9 @@ $ python main.py --target 192.168.1.0/24 --discover --ports 22,80
 
 3 active host(s): 192.168.1.1, 192.168.1.10, 192.168.1.42
 
-Scanning 192.168.1.1 — 2 ports (connect)
-Scanning 192.168.1.10 — 2 ports (connect)
-Scanning 192.168.1.42 — 2 ports (connect)
+Scanning 192.168.1.1: 2 ports (connect)
+Scanning 192.168.1.10: 2 ports (connect)
+Scanning 192.168.1.42: 2 ports (connect)
 
 --- Scan Summary ---
   Ports scanned   : 6

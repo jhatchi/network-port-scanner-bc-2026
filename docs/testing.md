@@ -24,7 +24,7 @@ Expected result: **76 passed**
 
 ## Coverage by Module
 
-### `test_scanner.py` — 28 tests
+### `test_scanner.py`: 28 tests
 
 | Test | Description |
 |------|-------------|
@@ -57,7 +57,7 @@ Expected result: **76 passed**
 | `test_detect_firewall_closed_on_rst` | TCP response with RST flag → "closed" |
 | `test_detect_firewall_active_on_icmp` | ICMP response (not TCP) → "filtered-active" |
 
-### `test_output.py` — 10 tests
+### `test_output.py`: 10 tests
 
 | Test | Description |
 |------|-------------|
@@ -72,7 +72,7 @@ Expected result: **76 passed**
 | `test_write_xml_firewall_element_present` | Element `<firewall type="filtered-active"/>` present |
 | `test_write_xml_escapes_special_characters` | `<`, `>`, `&` in banner → valid XML, value preserved |
 
-### `test_discovery.py` — 3 tests
+### `test_discovery.py`: 3 tests
 
 | Test | Description |
 |------|-------------|
@@ -80,7 +80,7 @@ Expected result: **76 passed**
 | `test_discover_hosts_returns_list` | Returns a list containing the active IP |
 | `test_discover_hosts_single_ip` | Single IP → returned if it responds |
 
-### `test_main.py` — 4 tests
+### `test_main.py`: 4 tests
 
 | Test | Description |
 |------|-------------|
@@ -89,7 +89,7 @@ Expected result: **76 passed**
 | `test_cli_syn_no_scapy` | SYN scan without scapy → warning displayed, no crash |
 | `test_cli_threads_option` | `--threads 50` → `scan_range_threaded` called with `max_workers=50` |
 
-### `test_sanitisation.py` — 31 tests (19 validation + 10 parse_ports + 2 threads)
+### `test_sanitisation.py`: 31 tests (19 validation + 10 parse_ports + 2 threads)
 
 | Test | Description |
 |------|-------------|
@@ -131,7 +131,7 @@ Expected result: **76 passed**
 
 | Case | Behavior |
 |------|----------|
-| Timeout = 0 | Rejected by validation — explicit error message |
+| Timeout = 0 | Rejected by validation: explicit error message |
 | Decimal with comma (`0,5`) | Accepted and automatically converted to `0.5` |
 | Invalid port (0 or > 65535) | `ValueError` raised by `parse_ports` |
 | Host not found | Error message + return code 1 |
@@ -141,5 +141,5 @@ Expected result: **76 passed**
 | Ctrl+C during scan | Clean stop, "Scan interrupted." message without traceback |
 | IPv6 as target | Accepted by the validator |
 | Multi-host scan | One result file created per host |
-| Banner with `<`, `>`, `&` | Correct XML export — characters escaped by ElementTree |
-| HTTPS on port 443 (version detect) | No TLS probe — fallback to generic `\r\n`, limitation documented |
+| Banner with `<`, `>`, `&` | Correct XML export: characters escaped by ElementTree |
+| HTTPS on port 443 (version detect) | No TLS probe: fallback to generic `\r\n`, limitation documented |

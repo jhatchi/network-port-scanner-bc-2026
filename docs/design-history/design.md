@@ -1,4 +1,4 @@
-# Design — Extended Network Scanner
+# Design: Extended Network Scanner
 
 **Date:** 2026-03-09 (updated 2026-03-13)
 **Status:** Implemented and merged on `main`

@@ -1,4 +1,4 @@
-# Network Port Scanner — User Guide
+# Network Port Scanner: User Guide
 
 A tool for analyzing open ports on a machine or network.
 Works in interactive mode (step-by-step questions) or via direct command line.
@@ -9,8 +9,8 @@ Works in interactive mode (step-by-step questions) or via direct command line.
 
 1. [Prerequisites and Installation](#1-prerequisites-and-installation)
 2. [Activate the Environment Before Each Session](#2-activate-the-environment-before-each-session)
-3. [TCP Connect Mode — Standard Scan](#3-tcp-connect-mode--standard-scan)
-4. [SYN Scan Mode — Stealth Scan](#4-syn-scan-mode--stealth-scan)
+3. [TCP Connect Mode: Standard Scan](#3-tcp-connect-mode--standard-scan)
+4. [SYN Scan Mode: Stealth Scan](#4-syn-scan-mode--stealth-scan)
 5. [All Available Options](#5-all-available-options)
 6. [Vulnerability Scanning](#6-vulnerability-scanning)
 7. [Report Formats](#7-report-formats)
@@ -22,13 +22,13 @@ Works in interactive mode (step-by-step questions) or via direct command line.
 
 > This only needs to be done **once** on your computer.
 
-### Step 1 — Install Python
+### Step 1: Install Python
 
 - Download Python 3.10 or newer from [python.org/downloads](https://www.python.org/downloads/)
 - **Windows:** during installation, check **"Add Python to PATH"** (checkbox at the bottom of the window)
 - **macOS / Linux:** Python is often already installed; verify with `python3 --version` in the terminal
 
-### Step 2 — Open a Terminal in the Project Folder
+### Step 2: Open a Terminal in the Project Folder
 
 **Windows:**
 1. Open the `Port_scanner_Reseau` folder in File Explorer
@@ -42,14 +42,14 @@ Works in interactive mode (step-by-step questions) or via direct command line.
 1. Right-click in the folder → "Open a terminal here" (depending on your distribution)
 2. Or: open a terminal and type `cd /path/to/Port_scanner_Reseau`
 
-### Step 3 — Create the Virtual Environment
+### Step 3: Create the Virtual Environment
 
 ```bash
 python3 -m venv .venv        # macOS / Linux
 python  -m venv .venv        # Windows (if "python3" doesn't work)
 ```
 
-### Step 4 — Activate the Environment
+### Step 4: Activate the Environment
 
 ```bash
 source .venv/bin/activate    # macOS / Linux
@@ -58,7 +58,7 @@ source .venv/bin/activate    # macOS / Linux
 
 > The name `(.venv)` appears at the beginning of the command line when activated.
 
-### Step 5 — Install Dependencies
+### Step 5: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -77,7 +77,7 @@ source .venv/bin/activate    # macOS / Linux
 
 ---
 
-## 3. TCP Connect Mode — Standard Scan
+## 3. TCP Connect Mode: Standard Scan
 
 > **No special privileges required.** Works on all systems.
 
@@ -129,11 +129,11 @@ python main.py --target 192.168.1.1 --ports 22,80,443
 
 ---
 
-## 4. SYN Scan Mode — Stealth Scan
+## 4. SYN Scan Mode: Stealth Scan
 
 > **Requires administrator privileges.** Also requires the `scapy` library and a low-level network driver.
 >
-> This mode sends only a SYN packet without completing the connection — more stealthy because the connections do not appear in application logs.
+> This mode sends only a SYN packet without completing the connection: more stealthy because the connections do not appear in application logs.
 >
 > When running as root/admin, the interactive CLI (`cli.py`) lets you **choose** between SYN scan and TCP connect scan. SYN is no longer auto-forced.
 
@@ -146,10 +146,10 @@ Nothing else to install. `scapy` is already included in `requirements.txt`.
 Launch the scan with `sudo` (prompts for the administrator password):
 
 ```bash
-# Interactive mode — choose SYN or TCP connect when prompted
+# Interactive mode: choose SYN or TCP connect when prompted
 sudo $(pwd)/.venv/bin/python cli.py
 
-# Direct command line — SYN scan
+# Direct command line: SYN scan
 sudo $(pwd)/.venv/bin/python main.py --target 192.168.1.1 --ports 1-1024 --scan-type syn
 ```
 
@@ -162,7 +162,7 @@ Same as macOS. Use `sudo` with the absolute path to the venv Python:
 
 ```bash
 # Find the absolute path of the venv Python
-which python   # after activating the venv — shows something like /home/user/project/.venv/bin/python
+which python   # after activating the venv: shows something like /home/user/project/.venv/bin/python
 
 # Interactive mode
 sudo /home/user/Port_scanner_Reseau/.venv/bin/python cli.py

@@ -19,67 +19,67 @@ The project is organized into separate modules by responsibility:
 
 ### `cli.py`
 Step-by-step interface for non-experts. Provides:
-- Predefined profiles (quick — 26 ports, standard, full, custom)
+- Predefined profiles (quick: 26 ports, standard, full, custom)
 - Simplified speed settings (Fast / Normal / Slow / Stealth) that configure threads, timeout, delay, max-rate, and randomize
 - Root users can choose between SYN scan and TCP connect (non-root users default to TCP connect)
-- `_print_safe()` — Windows Unicode compatibility fallback (replaces box-drawing chars with ASCII)
+- `_print_safe()`: Windows Unicode compatibility fallback (replaces box-drawing chars with ASCII)
 
 ### `main.py`
 Full CLI exposing all options:
-- `--target` — target (IP, hostname, CIDR)
-- `--ports` — port specification (e.g. `22,80-85,443`)
-- `--scan-type` — `connect` or `syn`
-- `--threads` — parallelism (default: 100)
-- `--timeout` — per-port timeout in seconds (default: 1.0)
-- `--delay` — delay between ports for rate limiting (default: 0)
-- `--discover` — host discovery before scanning
-- `--banner` — banner grabbing on open ports
-- `--version-detect` — detect service versions via protocol probes
-- `--os-detect` — detect OS via TTL fingerprinting (requires sudo)
-- `--firewall-detect` — distinguish DROP vs REJECT (requires sudo)
-- `--vuln-scan` — vulnerability analysis on open ports using NVD API
-- `--output` — output file (.txt / .json / .csv / .html / .xml)
-- `--randomize` — shuffle port order to avoid sequential scanning patterns
-- `--max-rate` — global rate limit in packets/second (serializes all sends across threads)
-- `--jitter` — random delay variation between ports (breaks regular timing patterns)
-- `--log-level` — logging level (DEBUG, INFO, WARNING)
+- `--target`: target (IP, hostname, CIDR)
+- `--ports`: port specification (e.g. `22,80-85,443`)
+- `--scan-type`: `connect` or `syn`
+- `--threads`: parallelism (default: 100)
+- `--timeout`: per-port timeout in seconds (default: 1.0)
+- `--delay`: delay between ports for rate limiting (default: 0)
+- `--discover`: host discovery before scanning
+- `--banner`: banner grabbing on open ports
+- `--version-detect`: detect service versions via protocol probes
+- `--os-detect`: detect OS via TTL fingerprinting (requires sudo)
+- `--firewall-detect`: distinguish DROP vs REJECT (requires sudo)
+- `--vuln-scan`: vulnerability analysis on open ports using NVD API
+- `--output`: output file (.txt / .json / .csv / .html / .xml)
+- `--randomize`: shuffle port order to avoid sequential scanning patterns
+- `--max-rate`: global rate limit in packets/second (serializes all sends across threads)
+- `--jitter`: random delay variation between ports (breaks regular timing patterns)
+- `--log-level`: logging level (DEBUG, INFO, WARNING)
 
 Input validation: `validate_target()` (supports IPv4, IPv6, CIDR, hostname), `validate_port()`, `parse_ports()`.
 
-Target resolution: `resolve_target()` — DNS resolution before scanning.
+Target resolution: `resolve_target()`: DNS resolution before scanning.
 
 Terminal output: statistics summary only (no per-port display). Per-port details are written to the report file.
 
 ### `scanner.py`
 Low-level functions:
-- `scan_port_connect(ip, port, timeout)` — scan via full TCP connection
-- `scan_port_syn(ip, port, timeout)` — scan via raw SYN packet (requires scapy + sudo)
-- `scan_range_threaded(ip, ports, scan_fn, timeout, delay, max_workers, randomize, max_rate, jitter)` — parallel scanning
-- `get_service_name(port)` — service name for a given port; uses a built-in dictionary first, then falls back to `socket.getservbyport()`
-- `grab_banner(ip, port, timeout)` — read the service banner
-- `detect_service_version(ip, port, service_name, timeout)` — protocol-specific probes (HTTP, SMTP, MySQL, DNS, VNC, Redis, IRC, PostgreSQL, etc.)
-- `detect_os(ip, timeout)` — TTL fingerprinting via scapy (requires sudo)
-- `detect_firewall(ip, port, timeout)` — distinguishes DROP vs REJECT via scapy (requires sudo)
-- `resolve_target(target)` — single DNS resolution before scanning
+- `scan_port_connect(ip, port, timeout)`: scan via full TCP connection
+- `scan_port_syn(ip, port, timeout)`: scan via raw SYN packet (requires scapy + sudo)
+- `scan_range_threaded(ip, ports, scan_fn, timeout, delay, max_workers, randomize, max_rate, jitter)`: parallel scanning
+- `get_service_name(port)`: service name for a given port; uses a built-in dictionary first, then falls back to `socket.getservbyport()`
+- `grab_banner(ip, port, timeout)`: read the service banner
+- `detect_service_version(ip, port, service_name, timeout)`: protocol-specific probes (HTTP, SMTP, MySQL, DNS, VNC, Redis, IRC, PostgreSQL, etc.)
+- `detect_os(ip, timeout)`: TTL fingerprinting via scapy (requires sudo)
+- `detect_firewall(ip, port, timeout)`: distinguishes DROP vs REJECT via scapy (requires sudo)
+- `resolve_target(target)`: single DNS resolution before scanning
 
 ### `output.py`
 Single function `write_output(results, path, target, scan_type)` that detects the file extension and writes:
-- `.txt` — plain text with target/OS header, one port per line with CVE details
-- `.json` — structured data with `meta` (target, scan_type, os, date) and `ports` sections
-- `.csv` — spreadsheet-compatible with os, version, firewall, vulns columns
-- `.html` — visual report with colors, statistics, OS in header, CVE badges with tooltips
-- `.xml` — Nmap-compatible format with `<os>` element and CVE descriptions
+- `.txt`: plain text with target/OS header, one port per line with CVE details
+- `.json`: structured data with `meta` (target, scan_type, os, date) and `ports` sections
+- `.csv`: spreadsheet-compatible with os, version, firewall, vulns columns
+- `.html`: visual report with colors, statistics, OS in header, CVE badges with tooltips
+- `.xml`: Nmap-compatible format with `<os>` element and CVE descriptions
 
 All formats display the detected OS in the header/metadata.
 
 ### `discovery.py`
-- `discover_hosts(network, timeout)` — ARP sweep (scapy) with ICMP ping fallback
-- `_arp_sweep(network, timeout)` — sends ARP packets on the subnet
-- `_icmp_sweep(network, timeout)` — parallel ping on all hosts in the CIDR
+- `discover_hosts(network, timeout)`: ARP sweep (scapy) with ICMP ping fallback
+- `_arp_sweep(network, timeout)`: sends ARP packets on the subnet
+- `_icmp_sweep(network, timeout)`: parallel ping on all hosts in the CIDR
 
 ### `vuln_analyzer.py`
-- `parse_banner(banner)` — dynamic regex extraction of `(software, version)` (SSH-specific + generic pattern)
-- `analyze_vulnerabilities(banner)` — queries NVD API for CVEs with CVSS >= 7.0, in-memory cache
+- `parse_banner(banner)`: dynamic regex extraction of `(software, version)` (SSH-specific + generic pattern)
+- `analyze_vulnerabilities(banner)`: queries NVD API for CVEs with CVSS >= 7.0, in-memory cache
 - Returns `[{"id": "CVE-...", "cvss": 9.8, "description": "..."}]`
 - Logging via `logging.debug`/`logging.warning` (no print to avoid polluting tqdm)
 - `--vuln-scan` flag triggers the analysis on open ports

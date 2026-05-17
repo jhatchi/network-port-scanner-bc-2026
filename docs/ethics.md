@@ -32,9 +32,9 @@ An unauthorized port scan can be classified as **unauthorized access to a comput
 ## Stealth and Detection
 
 ### How a Scan Can Be Detected
-- **IDS/IPS** (Snort, Suricata) — detect port scans by signature
-- **Firewall logs** — every connection attempt can be recorded
-- **Honeypots** — ports deliberately left open to trap scanners
+- **IDS/IPS** (Snort, Suricata): detect port scans by signature
+- **Firewall logs**: every connection attempt can be recorded
+- **Honeypots**: ports deliberately left open to trap scanners
 
 ### Reducing Footprint (within an authorized context)
 - Use **SYN scan** (fewer traces in application logs)

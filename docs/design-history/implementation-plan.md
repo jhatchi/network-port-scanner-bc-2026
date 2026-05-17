@@ -28,14 +28,14 @@
 
 ---
 
-## Task 1 — Test infrastructure
+## Task 1: Test infrastructure
 
 Created `tests/` directory with `__init__.py`.
 Verified that pytest collects without errors.
 
 ---
 
-## Task 2 — `output.py`
+## Task 2: `output.py`
 
 Extracted `write_output()` from `main.py` + added HTML format.
 
@@ -48,16 +48,16 @@ The HTML includes:
 
 ---
 
-## Task 3 — `get_service_name` + `grab_banner`
+## Task 3: `get_service_name` + `grab_banner`
 
 Added to `scanner.py`:
 
-- `get_service_name(port)` — uses `socket.getservbyport()`, fallback `"unknown"`
-- `grab_banner(ip, port, timeout)` — TCP connection + reads first line of response
+- `get_service_name(port)`: uses `socket.getservbyport()`, fallback `"unknown"`
+- `grab_banner(ip, port, timeout)`: TCP connection + reads first line of response
 
 ---
 
-## Task 4 — `scan_range_threaded`
+## Task 4: `scan_range_threaded`
 
 Added to `scanner.py`:
 
@@ -67,7 +67,7 @@ Added to `scanner.py`:
 
 ---
 
-## Task 5 — `scan_port_syn`
+## Task 5: `scan_port_syn`
 
 Added to `scanner.py`:
 
@@ -77,17 +77,17 @@ Added to `scanner.py`:
 
 ---
 
-## Task 6 — `discovery.py`
+## Task 6: `discovery.py`
 
 New module:
 
-- `discover_hosts(network, timeout)` — ARP if scapy available, otherwise ICMP
-- `_arp_sweep()` — scapy ARP broadcast
-- `_icmp_sweep()` — parallel ping on all hosts in the CIDR
+- `discover_hosts(network, timeout)`: ARP if scapy available, otherwise ICMP
+- `_arp_sweep()`: scapy ARP broadcast
+- `_icmp_sweep()`: parallel ping on all hosts in the CIDR
 
 ---
 
-## Task 7 — Rewrite `main.py`
+## Task 7: Rewrite `main.py`
 
 New arguments added:
 
@@ -102,13 +102,13 @@ New arguments added:
 
 ---
 
-## Task 8 — Configuration files
+## Task 8: Configuration files
 
 - `requirements.txt` updated: `tqdm`, `scapy`, `pytest`, `requests`
 
 ---
 
-## Task 9 — OS detection (`--os-detect`)
+## Task 9: OS detection (`--os-detect`)
 
 Added to `scanner.py`: `detect_os(ip, timeout)`
 
@@ -122,7 +122,7 @@ Added to `scanner.py`: `detect_os(ip, timeout)`
 
 ---
 
-## Task 10 — Version detection (`--version-detect`)
+## Task 10: Version detection (`--version-detect`)
 
 Added to `scanner.py`: `detect_service_version(ip, port, service_name, timeout)`
 
@@ -138,7 +138,7 @@ Added to `scanner.py`: `detect_service_version(ip, port, service_name, timeout)`
 
 ---
 
-## Task 11 — Firewall detection (`--firewall-detect`)
+## Task 11: Firewall detection (`--firewall-detect`)
 
 Added to `scanner.py`: `detect_firewall(ip, port, timeout)`
 
@@ -152,7 +152,7 @@ Added to `scanner.py`: `detect_firewall(ip, port, timeout)`
 
 ---
 
-## Task 12 — XML export (`--output scan.xml`)
+## Task 12: XML export (`--output scan.xml`)
 
 Added to `output.py`: `_write_xml(results, path, target, scan_type)`
 
@@ -163,26 +163,26 @@ Added to `output.py`: `_write_xml(results, path, target, scan_type)`
 
 ---
 
-## Task 13 — Cross-platform compatibility
+## Task 13: Cross-platform compatibility
 
 Fixes applied across all modules:
 
 | File | Fix |
 |------|-----|
-| `scanner.py` | `getattr(os, "geteuid", lambda: 1)()` — `geteuid` does not exist on Windows |
+| `scanner.py` | `getattr(os, "geteuid", lambda: 1)()`: `geteuid` does not exist on Windows |
 | `scanner.py` | `_ECONNREFUSED_CODES` includes `WSAECONNREFUSED` (Windows error code) |
 | `discovery.py` | OS-adapted ping: `-W` seconds (Linux), `-W` ms (macOS), `-n -w` ms (Windows) |
 | `main.py` | `validate_target()` accepts IPv6 addresses via `ipaddress.ip_address()` |
 | `main.py` | Multi-host scan: one result file per host |
-| `cli.py` | `_print_safe()` — ASCII fallback if Windows terminal doesn't support UTF-8 |
+| `cli.py` | `_print_safe()`: ASCII fallback if Windows terminal doesn't support UTF-8 |
 
 ---
 
-## Task 14 — Vulnerability scanning (`--vuln-scan`)
+## Task 14: Vulnerability scanning (`--vuln-scan`)
 
 New module `vuln_analyzer.py`:
 
-- `scan_vulnerabilities(service_name, version)` — queries the NVD API for known CVEs
+- `scan_vulnerabilities(service_name, version)`: queries the NVD API for known CVEs
 - Local CVE cache to avoid repeated API calls and reduce latency
 - Results added as `"vulns"` key in per-port result dict (list of CVE objects)
 - Each CVE entry contains: `cve` (ID), `severity` (CRITICAL/HIGH/MEDIUM/LOW), `description`
