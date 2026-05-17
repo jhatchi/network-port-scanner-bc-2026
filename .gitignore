@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Worktrees / Claude local
+.worktrees/
+.claude/
+
+# Generated scan reports (keep the example one tracked in docs/examples/)
+/scan_*.html
+/scan_*.xml
+/scan_*.json
+/scan_*.csv
+/scan_*.txt
+scan_results.*
+*.scan.json
+
+# Private notes (kept outside the repo)
+CLAUDE.md
+FEATURE_2_*.md
+PRESENTATION.md
+REPORT_FR.md
+
+# GitHub Wiki source (pushed separately to the Wiki repo)
+wiki/
