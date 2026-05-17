@@ -1,6 +1,6 @@
-# Dépendances optionnelles
+# Optional runtime dependencies
 tqdm      # progress bar
-scapy     # SYN scan + ARP discovery (nécessite sudo)
+scapy     # SYN scan + ARP discovery (requires sudo)
 requests  # REST API calls (vulnerability analyzer)
 
 # Dev
