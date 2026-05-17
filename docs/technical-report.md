@@ -91,7 +91,7 @@ Despite these measures, a well-configured IDS (Intrusion Detection System) will 
 The project follows a **modular architecture** with clear separation of concerns:
 
 ```
-Port_scanner_Reseau/
+network-port-scanner/
 ├── main.py          → Orchestrator: argument parsing, input validation, scan loop
 ├── cli.py           → Interactive wizard: step-by-step interface for non-experts
 ├── scanner.py       → Scan engine: all network-level operations

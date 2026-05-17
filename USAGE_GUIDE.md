@@ -31,16 +31,16 @@ Works in interactive mode (step-by-step questions) or via direct command line.
 ### Step 2: Open a Terminal in the Project Folder
 
 **Windows:**
-1. Open the `Port_scanner_Reseau` folder in File Explorer
+1. Open the `network-port-scanner` folder in File Explorer
 2. Click in the address bar, type `cmd` or `powershell`, press Enter
 
 **macOS:**
 1. Open the Terminal (Spotlight → search for "Terminal")
-2. Type `cd ` (with a space) then drag the `Port_scanner_Reseau` folder into the window, press Enter
+2. Type `cd ` (with a space) then drag the `network-port-scanner` folder into the window, press Enter
 
 **Linux:**
 1. Right-click in the folder → "Open a terminal here" (depending on your distribution)
-2. Or: open a terminal and type `cd /path/to/Port_scanner_Reseau`
+2. Or: open a terminal and type `cd /path/to/network-port-scanner`
 
 ### Step 3: Create the Virtual Environment
 
@@ -165,13 +165,13 @@ Same as macOS. Use `sudo` with the absolute path to the venv Python:
 which python   # after activating the venv: shows something like /home/user/project/.venv/bin/python
 
 # Interactive mode
-sudo /home/user/Port_scanner_Reseau/.venv/bin/python cli.py
+sudo /home/user/network-port-scanner/.venv/bin/python cli.py
 
 # Direct command line
-sudo /home/user/Port_scanner_Reseau/.venv/bin/python main.py --target 192.168.1.1 --ports 1-1024 --scan-type syn
+sudo /home/user/network-port-scanner/.venv/bin/python main.py --target 192.168.1.1 --ports 1-1024 --scan-type syn
 ```
 
-> Replace `/home/user/Port_scanner_Reseau/` with the actual path of the folder on your machine.
+> Replace `/home/user/network-port-scanner/` with the actual path of the folder on your machine.
 
 #### Windows
 
@@ -186,7 +186,7 @@ Windows requires an additional network driver for raw packets:
 
 3. Navigate to the project folder and activate the venv:
    ```
-   cd C:\path\to\Port_scanner_Reseau
+   cd C:\path\to\network-port-scanner
    .venv\Scripts\activate
    ```
 

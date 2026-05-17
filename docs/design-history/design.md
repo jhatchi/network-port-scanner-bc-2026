@@ -25,7 +25,7 @@ Extend the Phase 1/2 scanner (basic sequential TCP scan) into a full-featured to
 ## Architecture: separate modules
 
 ```
-Port_scanner_Reseau/
+network-port-scanner/
 ├── cli.py            # Simplified interactive interface (non-experts)
 ├── main.py           # Full CLI via argparse
 ├── scanner.py        # Scan library (connect, SYN, threaded, banner, version, OS, firewall)
