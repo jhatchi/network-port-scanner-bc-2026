@@ -2,7 +2,7 @@
 
 A Python TCP port scanner with interactive CLI, SYN stealth mode, host discovery, automated CVE lookup, OS and version detection, firewall fingerprinting, and Nmap-compatible reports. Built as a 4-day team project during the BeCode Brussels Blue & Red Team bootcamp.
 
-[![tests](https://github.com/Jhatchi/network-port-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/Jhatchi/network-port-scanner/actions/workflows/tests.yml)
+[![tests](https://github.com/Jhatchi/Network-Port-Scanner-BC-2026/actions/workflows/tests.yml/badge.svg)](https://github.com/Jhatchi/Network-Port-Scanner-BC-2026/actions/workflows/tests.yml)
 [![Tests](https://img.shields.io/badge/tests-76%20passing-brightgreen.svg)](docs/testing.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](requirements.txt)
 [![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](docs/architecture.md)
@@ -52,7 +52,7 @@ The authors disclaim all responsibility in case of misuse. Use the included `--r
 ## Quick start
 
 ```bash
-git clone https://github.com/Jhatchi/network-port-scanner.git && cd network-port-scanner
+git clone https://github.com/Jhatchi/Network-Port-Scanner-BC-2026.git && cd Network-Port-Scanner-BC-2026
 python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 python cli.py    # interactive wizard, OR: python main.py --target 192.168.1.1 --ports 22,80,443 --output scan.html
 ```
@@ -72,7 +72,7 @@ Four-day BeCode bootcamp team project. Three contributors, distinct responsibili
 | Contributor | Scope | Where to look |
 |---|---|---|
 | **[Johan-Emmanuel Hatchi](https://github.com/Jhatchi)** | Architecture, scan engine (`scanner.py`), reporting layer (`output.py`), interactive CLI (`cli.py`), test suite (76 tests), cross-platform compatibility, integration | Main branch, full commit history |
-| **Mike** ([Mike00001](https://github.com/Mike00001)) | CVE reporting integration: changes to `cli.py`, `main.py`, `output.py` to surface vulnerabilities in the HTML/JSON/CSV outputs | Branch [`Mike_dev`](https://github.com/Jhatchi/network-port-scanner/tree/Mike_dev) (kept unmerged to preserve original commit authorship) |
+| **Mike** ([Mike00001](https://github.com/Mike00001)) | CVE reporting integration: changes to `cli.py`, `main.py`, `output.py` to surface vulnerabilities in the HTML/JSON/CSV outputs | Branch [`Mike_dev`](https://github.com/Jhatchi/Network-Port-Scanner-BC-2026/tree/Mike_dev) (kept unmerged to preserve original commit authorship) |
 | **Gaëtan** ([Gaetan5555](https://github.com/Gaetan5555)) | Service detection (protocol-specific version probes design) | Code shared via messages due to a Git branching setup issue, integrated into the main branch under Johan's commits |
 
 ### Why the single-author git history on `main`
